@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   format,
   startOfWeek,
@@ -58,17 +58,29 @@ const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 // 미니 캘린더에서 사용할 요일 헤더
 const MINI_DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export function WeeklyCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [miniCalMonth, setMiniCalMonth] = useState(new Date());
-  const [sessions, setSessions] = useState<CalendarSession[]>([]);
-  const [userCenters, setUserCenters] = useState<UserCenter[]>([]);
+interface WeeklyCalendarProps {
+  initialDate: string;
+  initialSessions: CalendarSession[];
+  initialUserCenters: UserCenter[];
+}
+
+export function WeeklyCalendar({
+  initialDate,
+  initialSessions,
+  initialUserCenters,
+}: WeeklyCalendarProps) {
+  const [currentDate, setCurrentDate] = useState(() => new Date(initialDate));
+  const [miniCalMonth, setMiniCalMonth] = useState(() => new Date(initialDate));
+  const [sessions, setSessions] = useState<CalendarSession[]>(initialSessions);
+  const [userCenters, setUserCenters] =
+    useState<UserCenter[]>(initialUserCenters);
   const [visibleCenters, setVisibleCenters] = useState<Set<string>>(
-    new Set()
+    () => new Set(initialUserCenters.map((c) => c.center_id))
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [editSession, setEditSession] = useState<CalendarSession | null>(null);
+  const isFirstLoadRef = useRef(true);
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -114,6 +126,10 @@ export function WeeklyCalendar() {
   }
 
   const loadData = useCallback(async () => {
+    if (isFirstLoadRef.current) {
+      isFirstLoadRef.current = false;
+      return;
+    }
     const start = format(weekStart, "yyyy-MM-dd");
     const end = format(addDays(weekStart, 6), "yyyy-MM-dd");
     const [s, uc] = await Promise.all([

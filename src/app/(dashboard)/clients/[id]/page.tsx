@@ -15,34 +15,39 @@ export default async function ClientDetailPage({
 
   if (!user) notFound();
 
-  const { data: client } = await supabase
-    .from("clients")
-    .select("*, centers(name)")
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .single();
+  const [clientRes, sessionsRes, userCentersRes, clientTestsRes] =
+    await Promise.all([
+      supabase
+        .from("clients")
+        .select("*, centers(name)")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("sessions")
+        .select("*")
+        .eq("client_id", id)
+        .eq("user_id", user.id)
+        .order("session_number", { ascending: false }),
+      supabase
+        .from("user_centers")
+        .select("center_id, color, centers(id, name)")
+        .eq("user_id", user.id)
+        .eq("is_active", true),
+      supabase
+        .from("client_tests")
+        .select("*")
+        .eq("client_id", id)
+        .eq("user_id", user.id)
+        .order("test_date", { ascending: false }),
+    ]);
+
+  const client = clientRes.data;
+  const sessions = sessionsRes.data;
+  const userCenters = userCentersRes.data;
+  const clientTests = clientTestsRes.data;
 
   if (!client) notFound();
-
-  const { data: sessions } = await supabase
-    .from("sessions")
-    .select("*")
-    .eq("client_id", id)
-    .eq("user_id", user.id)
-    .order("session_number", { ascending: false });
-
-  const { data: userCenters } = await supabase
-    .from("user_centers")
-    .select("center_id, color, centers(id, name)")
-    .eq("user_id", user.id)
-    .eq("is_active", true);
-
-  const { data: clientTests } = await supabase
-    .from("client_tests")
-    .select("*")
-    .eq("client_id", id)
-    .eq("user_id", user.id)
-    .order("test_date", { ascending: false });
 
   return (
     <ClientDetailClient

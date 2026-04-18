@@ -1,5 +1,40 @@
+import { addDays, format, startOfWeek } from "date-fns";
+import { createClient } from "@/lib/supabase/server";
 import { WeeklyCalendar } from "@/components/calendar/weekly-calendar";
 
-export default function DashboardPage() {
-  return <WeeklyCalendar />;
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const now = new Date();
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+  const startStr = format(weekStart, "yyyy-MM-dd");
+  const endStr = format(addDays(weekStart, 6), "yyyy-MM-dd");
+
+  const [sessionsRes, userCentersRes] = await Promise.all([
+    supabase
+      .from("sessions")
+      .select("*, clients(name), centers(name)")
+      .eq("user_id", user.id)
+      .gte("session_date", startStr)
+      .lte("session_date", endStr)
+      .order("start_time", { ascending: true }),
+    supabase
+      .from("user_centers")
+      .select("*, centers(id, name)")
+      .eq("user_id", user.id)
+      .eq("is_active", true),
+  ]);
+
+  return (
+    <WeeklyCalendar
+      initialDate={now.toISOString()}
+      initialSessions={sessionsRes.data ?? []}
+      initialUserCenters={userCentersRes.data ?? []}
+    />
+  );
 }
