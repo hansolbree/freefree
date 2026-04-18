@@ -19,17 +19,17 @@ export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(register, null);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">회원가입</CardTitle>
-          <CardDescription>
-            FreeFree 계정을 만들어보세요
-          </CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-mint-pink px-4">
+      <Card className="w-full max-w-md rounded-3xl shadow-lg border-0">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-3xl font-bold text-gradient-mint-pink">
+            회원가입
+          </CardTitle>
+          <CardDescription>FreeFree 계정을 만들어보세요</CardDescription>
         </CardHeader>
         <CardContent>
           {state?.error && (
-            <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
               {state.error}
             </div>
           )}
@@ -41,6 +41,7 @@ export default function RegisterPage() {
                 name="name"
                 type="text"
                 placeholder="이름을 입력하세요"
+                className="rounded-xl"
               />
             </div>
             <div className="space-y-2">
@@ -50,6 +51,7 @@ export default function RegisterPage() {
                 name="email"
                 type="email"
                 placeholder="email@example.com"
+                className="rounded-xl"
                 required
               />
             </div>
@@ -60,6 +62,7 @@ export default function RegisterPage() {
                 name="password"
                 type="password"
                 placeholder="6자 이상"
+                className="rounded-xl"
                 required
               />
             </div>
@@ -70,18 +73,26 @@ export default function RegisterPage() {
                 name="confirmPassword"
                 type="password"
                 placeholder="비밀번호를 다시 입력하세요"
+                className="rounded-xl"
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={pending}>
+            <Button
+              type="submit"
+              className="w-full rounded-xl bg-gradient-mint-pink-vivid text-white font-semibold hover:opacity-90 transition-opacity"
+              disabled={pending}
+            >
               {pending ? "가입 중..." : "회원가입"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="justify-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             이미 계정이 있으신가요?{" "}
-            <Link href="/login" className="font-medium text-gray-900 hover:underline">
+            <Link
+              href="/login"
+              className="font-medium text-primary hover:underline"
+            >
               로그인
             </Link>
           </p>
