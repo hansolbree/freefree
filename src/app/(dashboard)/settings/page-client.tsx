@@ -37,8 +37,8 @@ export function SettingsClient({ profile }: SettingsClientProps) {
   return (
     <div className="max-w-lg">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">설정</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold text-foreground">설정</h1>
+        <p className="text-base text-muted-foreground mt-1">
           프로필 정보를 관리하세요
         </p>
       </div>
@@ -93,7 +93,7 @@ export function SettingsClient({ profile }: SettingsClientProps) {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-gradient-mint-pink-vivid text-white font-semibold hover:opacity-90 transition-opacity"
+              className="w-full rounded-xl bg-gradient-mint-pink-vivid text-white text-base font-semibold hover:opacity-90 transition-opacity"
             >
               {loading ? "저장 중..." : "프로필 저장"}
             </Button>

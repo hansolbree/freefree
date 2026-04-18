@@ -24,11 +24,25 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { createClientRecord, deleteClient } from "./actions";
 
+function calculateAge(birthDate: string | null): number | null {
+  if (!birthDate) return null;
+  const birth = new Date(birthDate);
+  if (isNaN(birth.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  return age >= 0 ? age : null;
+}
+
 interface Client {
   id: string;
   name: string;
   center_id: string;
   phone: string | null;
+  gender: string | null;
+  occupation: string | null;
+  birth_date: string | null;
   is_active: boolean;
   centers: { name: string } | null;
 }
@@ -91,15 +105,15 @@ export function ClientsPageClient({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">내담자</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold text-foreground">내담자</h1>
+          <p className="text-base text-muted-foreground mt-1">
             내담자를 관리하고 상담 기록을 확인하세요
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger
             render={
-              <Button className="rounded-xl bg-gradient-mint-pink-vivid text-white font-semibold hover:opacity-90 transition-opacity gap-2" />
+              <Button className="rounded-xl bg-gradient-mint-pink-vivid text-white text-base font-semibold hover:opacity-90 transition-opacity gap-2 px-5 py-5" />
             }
           >
             <Plus className="h-4 w-4" />
@@ -160,27 +174,41 @@ export function ClientsPageClient({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="birth_date">생년월일</Label>
+                    <Label htmlFor="age">나이</Label>
                     <Input
-                      id="birth_date"
-                      name="birth_date"
-                      type="date"
+                      id="age"
+                      name="age"
+                      type="number"
+                      min={0}
+                      max={120}
+                      placeholder="만 나이"
                       className="rounded-xl"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="gender">성별</Label>
-                  <Select name="gender">
-                    <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="선택" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="여성">여성</SelectItem>
-                      <SelectItem value="남성">남성</SelectItem>
-                      <SelectItem value="기타">기타</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">성별</Label>
+                    <Select name="gender">
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue placeholder="선택" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="여성">여성</SelectItem>
+                        <SelectItem value="남성">남성</SelectItem>
+                        <SelectItem value="기타">기타</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="occupation">직업</Label>
+                    <Input
+                      id="occupation"
+                      name="occupation"
+                      placeholder="예: 회사원, 학생"
+                      className="rounded-xl"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes">메모</Label>
@@ -208,22 +236,22 @@ export function ClientsPageClient({
       {/* Search + Filter */}
       <div className="flex gap-3 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="이름 검색..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 rounded-xl"
+            className="pl-11 rounded-xl text-base h-11"
           />
         </div>
         <Select value={filterCenter} onValueChange={(v) => setFilterCenter(v ?? "all")}>
-          <SelectTrigger className="w-32 sm:w-40 rounded-xl">
+          <SelectTrigger className="w-32 sm:w-40 rounded-xl text-base h-11">
             <SelectValue placeholder="전체 센터" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="all">전체 센터</SelectItem>
+            <SelectItem value="all" className="text-base">전체 센터</SelectItem>
             {userCenters.map((uc) => (
-              <SelectItem key={uc.center_id} value={uc.center_id}>
+              <SelectItem key={uc.center_id} value={uc.center_id} className="text-base">
                 {uc.centers?.name}
               </SelectItem>
             ))}
@@ -249,24 +277,35 @@ export function ClientsPageClient({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-4 md:gap-5">
           {filtered.map((client) => {
             const color = getCenterColor(client.center_id);
+            const age = calculateAge(client.birth_date);
+            const metaParts = [
+              age != null ? `${age}세` : null,
+              client.gender,
+              client.occupation,
+            ].filter(Boolean);
             return (
               <Link key={client.id} href={`/clients/${client.id}`}>
-                <Card className="rounded-2xl border-0 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+                <Card className="rounded-2xl border-0 bg-white/45 backdrop-blur-sm shadow-sm hover:shadow-md hover:bg-white/60 transition-all">
                   <CardContent className="p-4 flex items-center gap-4">
                     <div
-                      className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                      className="h-12 w-12 rounded-full flex items-center justify-center text-base font-bold text-white shrink-0"
                       style={{ backgroundColor: color }}
                     >
                       {client.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground truncate">
+                      <p className="text-lg font-semibold text-foreground truncate">
                         {client.name}
+                        {metaParts.length > 0 && (
+                          <span className="ml-2 text-base font-normal text-muted-foreground">
+                            {metaParts.join(" · ")}
+                          </span>
+                        )}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-base text-muted-foreground mt-0.5">
                         {client.centers?.name}
                         {client.phone && ` · ${client.phone}`}
                       </p>

@@ -25,7 +25,7 @@ export function Sidebar() {
           <h1 className="text-2xl font-bold text-gradient-mint-pink">
             FreeFree
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             심리상담사 대시보드
           </p>
         </Link>
@@ -41,7 +41,7 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all",
+                  "flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium transition-all",
                   isActive
                     ? "bg-gradient-mint-pink-vivid text-white shadow-md"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -59,7 +59,7 @@ export function Sidebar() {
           <Button
             type="submit"
             variant="ghost"
-            className="w-full justify-start gap-3 rounded-2xl px-4 py-3 text-muted-foreground hover:text-foreground"
+            className="w-full justify-start gap-3 rounded-2xl px-4 py-3 text-base text-muted-foreground hover:text-foreground"
           >
             <LogOut className="h-5 w-5" />
             로그아웃

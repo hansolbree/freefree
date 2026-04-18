@@ -426,7 +426,7 @@ export function WeeklyCalendar({
         {/* Mini Calendar */}
         <div className="rounded-2xl bg-white/80 backdrop-blur-sm shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-foreground">
+            <h3 className="text-base font-bold text-foreground">
               {format(miniCalMonth, "MMMM yyyy", { locale: ko })}
             </h3>
             <div className="flex items-center gap-1">
@@ -488,7 +488,7 @@ export function WeeklyCalendar({
         {/* Categories (Center Filter) */}
         {userCenters.length > 0 && (
           <div className="rounded-2xl bg-white/80 backdrop-blur-sm shadow-sm p-5">
-            <h3 className="text-sm font-bold text-foreground mb-4">센터</h3>
+            <h3 className="text-base font-bold text-foreground mb-4">센터</h3>
             <div className="space-y-3">
               {userCenters.map((uc) => {
                 const isVisible = visibleCenters.has(uc.center_id);
@@ -558,7 +558,7 @@ export function WeeklyCalendar({
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
-            <h1 className="text-xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-foreground">
               {format(weekStart, "M월 d일", { locale: ko })} -{" "}
               {format(addDays(weekStart, 6), "d일", { locale: ko })},{" "}
               {format(weekStart, "yyyy")}
@@ -571,7 +571,7 @@ export function WeeklyCalendar({
             <Button
               variant="outline"
               size="sm"
-              className="rounded-xl text-xs"
+              className="rounded-xl text-sm"
               onClick={() => setCurrentDate(new Date())}
             >
               오늘

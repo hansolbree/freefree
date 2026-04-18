@@ -9,6 +9,7 @@ import {
   Mail,
   Calendar,
   User,
+  Briefcase,
   Plus,
   Trash2,
   Pencil,
@@ -36,8 +37,20 @@ interface ClientData {
   email: string | null;
   birth_date: string | null;
   gender: string | null;
+  occupation: string | null;
   notes: string | null;
   centers: { name: string } | null;
+}
+
+function calculateAge(birthDate: string | null): number | null {
+  if (!birthDate) return null;
+  const birth = new Date(birthDate);
+  if (isNaN(birth.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  return age >= 0 ? age : null;
 }
 
 interface SessionData {
@@ -168,7 +181,7 @@ export function ClientDetailClient({
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="session_date" className="text-xs">
+                <Label htmlFor="session_date" className="text-sm">
                   상담 날짜 *
                 </Label>
                 <Input
@@ -183,7 +196,7 @@ export function ClientDetailClient({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="session_number" className="text-xs">
+                <Label htmlFor="session_number" className="text-sm">
                   회기번호 *
                 </Label>
                 <Input
@@ -199,7 +212,7 @@ export function ClientDetailClient({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="start_time" className="text-xs">
+                <Label htmlFor="start_time" className="text-sm">
                   시작 시간
                 </Label>
                 <Input
@@ -211,7 +224,7 @@ export function ClientDetailClient({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="end_time" className="text-xs">
+                <Label htmlFor="end_time" className="text-sm">
                   종료 시간
                 </Label>
                 <Input
@@ -224,7 +237,7 @@ export function ClientDetailClient({
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="session_type" className="text-xs">
+              <Label htmlFor="session_type" className="text-sm">
                 상담 유형
               </Label>
               <Input
@@ -236,7 +249,7 @@ export function ClientDetailClient({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="notes" className="text-xs">
+              <Label htmlFor="notes" className="text-sm">
                 상담 메모
               </Label>
               <Textarea
@@ -274,11 +287,11 @@ export function ClientDetailClient({
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-5xl">
       {/* Back */}
       <Link
         href="/clients"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6"
+        className="inline-flex items-center gap-1 text-base text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="h-4 w-4" />
         내담자 목록
@@ -287,54 +300,60 @@ export function ClientDetailClient({
       {/* Client Info */}
       <Card className="rounded-3xl border-0 bg-white/70 backdrop-blur-sm shadow-md mb-6">
         <CardContent className="p-6">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-4 mb-5">
             <div
-              className="h-14 w-14 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0"
+              className="h-16 w-16 rounded-full flex items-center justify-center text-2xl font-bold text-white shrink-0"
               style={{ backgroundColor: centerColor }}
             >
               {client.name.charAt(0)}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-3xl font-bold text-foreground">
                 {client.name}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground mt-0.5">
                 {client.centers?.name}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-base">
             {client.phone ? (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Phone className="h-3.5 w-3.5" />
+                <Phone className="h-4 w-4" />
                 {client.phone}
               </div>
             ) : null}
             {client.email ? (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="h-3.5 w-3.5" />
+                <Mail className="h-4 w-4" />
                 {client.email}
               </div>
             ) : null}
-            {client.birth_date ? (
+            {calculateAge(client.birth_date) != null ? (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="h-3.5 w-3.5" />
-                {client.birth_date}
+                <Calendar className="h-4 w-4" />
+                {calculateAge(client.birth_date)}세
               </div>
             ) : null}
             {client.gender ? (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <User className="h-3.5 w-3.5" />
+                <User className="h-4 w-4" />
                 {client.gender}
+              </div>
+            ) : null}
+            {client.occupation ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Briefcase className="h-4 w-4" />
+                {client.occupation}
               </div>
             ) : null}
           </div>
 
           {client.notes ? (
             <>
-              <Separator className="my-4" />
-              <p className="text-sm text-muted-foreground">{client.notes}</p>
+              <Separator className="my-5" />
+              <p className="text-base text-muted-foreground">{client.notes}</p>
             </>
           ) : null}
         </CardContent>
@@ -342,9 +361,9 @@ export function ClientDetailClient({
 
       {/* 심리검사 */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-foreground">
+        <h2 className="text-xl font-bold text-foreground">
           심리검사{" "}
-          <span className="text-muted-foreground font-normal text-sm">
+          <span className="text-muted-foreground font-normal text-base">
             ({clientTests.length}건)
           </span>
         </h2>
@@ -371,7 +390,7 @@ export function ClientDetailClient({
                 </div>
               )}
               <div className="space-y-1.5">
-                <Label htmlFor="test_name" className="text-xs">
+                <Label htmlFor="test_name" className="text-sm">
                   검사명 *
                 </Label>
                 <Input
@@ -383,7 +402,7 @@ export function ClientDetailClient({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="test_date" className="text-xs">
+                <Label htmlFor="test_date" className="text-sm">
                   검사 날짜 *
                 </Label>
                 <Input
@@ -396,7 +415,7 @@ export function ClientDetailClient({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="test_notes" className="text-xs">
+                <Label htmlFor="test_notes" className="text-sm">
                   메모
                 </Label>
                 <Textarea
@@ -517,18 +536,18 @@ export function ClientDetailClient({
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div
-                          className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                          className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
                           style={{ backgroundColor: centerColor }}
                         >
                           {session.session_number}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-foreground">
+                          <p className="text-base font-medium text-foreground">
                             {session.session_number}회기
                             {session.session_type &&
                               ` · ${session.session_type}`}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground mt-0.5">
                             {session.session_date}
                             {session.start_time && session.end_time
                               ? ` · ${session.start_time.slice(0, 5)}-${session.end_time.slice(0, 5)}`
@@ -560,7 +579,7 @@ export function ClientDetailClient({
                       </div>
                     </div>
                     {session.notes ? (
-                      <p className="mt-2 text-sm text-muted-foreground ml-11">
+                      <p className="mt-2 text-base text-muted-foreground ml-13">
                         {session.notes}
                       </p>
                     ) : null}

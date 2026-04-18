@@ -30,15 +30,15 @@ export function CenterPageClient({ centers }: { centers: Center[] }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">상담센터</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold text-foreground">상담센터</h1>
+          <p className="text-base text-muted-foreground mt-1">
             출근하는 상담센터를 관리하세요
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger
             render={
-              <Button className="rounded-xl bg-gradient-mint-pink-vivid text-white font-semibold hover:opacity-90 transition-opacity gap-2" />
+              <Button className="rounded-xl bg-gradient-mint-pink-vivid text-white text-base font-semibold hover:opacity-90 transition-opacity gap-2 px-5 py-5" />
             }
           >
             <Plus className="h-4 w-4" />

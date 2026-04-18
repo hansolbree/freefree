@@ -178,6 +178,7 @@ export interface Database {
           email: string | null;
           birth_date: string | null;
           gender: string | null;
+          occupation: string | null;
           notes: string | null;
           is_active: boolean;
           created_at: string;
@@ -192,6 +193,7 @@ export interface Database {
           email?: string | null;
           birth_date?: string | null;
           gender?: string | null;
+          occupation?: string | null;
           notes?: string | null;
           is_active?: boolean;
           created_at?: string;
@@ -204,6 +206,7 @@ export interface Database {
           email?: string | null;
           birth_date?: string | null;
           gender?: string | null;
+          occupation?: string | null;
           notes?: string | null;
           is_active?: boolean;
           updated_at?: string;

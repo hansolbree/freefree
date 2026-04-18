@@ -3,6 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
+function ageToBirthDate(ageInput: string | null): string | null {
+  if (!ageInput) return null;
+  const age = parseInt(ageInput, 10);
+  if (!Number.isFinite(age) || age < 0 || age > 120) return null;
+  const year = new Date().getFullYear() - age;
+  return `${year}-01-01`;
+}
+
 export async function getClients(centerId?: string, search?: string) {
   const supabase = await createClient();
   const {
@@ -60,8 +68,11 @@ export async function createClientRecord(formData: FormData) {
   const name = formData.get("name") as string;
   const phone = (formData.get("phone") as string) || null;
   const email = (formData.get("email") as string) || null;
-  const birth_date = (formData.get("birth_date") as string) || null;
+  const ageInput = formData.get("age") as string;
+  const birth_date = ageToBirthDate(ageInput) ??
+    ((formData.get("birth_date") as string) || null);
   const gender = (formData.get("gender") as string) || null;
+  const occupation = (formData.get("occupation") as string) || null;
   const notes = (formData.get("notes") as string) || null;
 
   if (!center_id || !name?.trim()) {
@@ -76,6 +87,7 @@ export async function createClientRecord(formData: FormData) {
     email,
     birth_date,
     gender,
+    occupation,
     notes,
   });
 
@@ -97,13 +109,14 @@ export async function updateClient(clientId: string, formData: FormData) {
   const email = (formData.get("email") as string) || null;
   const birth_date = (formData.get("birth_date") as string) || null;
   const gender = (formData.get("gender") as string) || null;
+  const occupation = (formData.get("occupation") as string) || null;
   const notes = (formData.get("notes") as string) || null;
 
   if (!name?.trim()) return { error: "이름을 입력해주세요." };
 
   const { error } = await supabase
     .from("clients")
-    .update({ name, phone, email, birth_date, gender, notes })
+    .update({ name, phone, email, birth_date, gender, occupation, notes })
     .eq("id", clientId)
     .eq("user_id", user.id);
 
