@@ -32,7 +32,8 @@ export async function register(prevState: { error: string; success?: boolean } |
   });
 
   if (error) {
-    return { error: "회원가입에 실패했습니다. 다시 시도해주세요." };
+    console.error("Signup error:", error.message);
+    return { error: error.message };
   }
 
   redirect("/login?registered=true");

@@ -37,11 +37,19 @@ export default async function ClientDetailPage({
     .eq("user_id", user.id)
     .eq("is_active", true);
 
+  const { data: clientTests } = await supabase
+    .from("client_tests")
+    .select("*")
+    .eq("client_id", id)
+    .eq("user_id", user.id)
+    .order("test_date", { ascending: false });
+
   return (
     <ClientDetailClient
       client={client}
       sessions={sessions ?? []}
       userCenters={userCenters ?? []}
+      clientTests={clientTests ?? []}
     />
   );
 }

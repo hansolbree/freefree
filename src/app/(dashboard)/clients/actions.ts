@@ -143,6 +143,8 @@ export async function createSession(formData: FormData) {
   const client_id = formData.get("client_id") as string;
   const center_id = formData.get("center_id") as string;
   const session_date = formData.get("session_date") as string;
+  const start_time = (formData.get("start_time") as string) || null;
+  const end_time = (formData.get("end_time") as string) || null;
   const duration_minutes = parseInt(
     (formData.get("duration_minutes") as string) || "50",
     10
@@ -154,17 +156,24 @@ export async function createSession(formData: FormData) {
     return { error: "필수 항목을 입력해주세요." };
   }
 
-  // 다음 회기 번호
-  const { data: lastSession } = await supabase
-    .from("sessions")
-    .select("session_number")
-    .eq("client_id", client_id)
-    .eq("user_id", user.id)
-    .order("session_number", { ascending: false })
-    .limit(1)
-    .single();
+  // 회기번호: 직접 입력하거나 자동 계산
+  const session_number_input = formData.get("session_number") as string;
+  let session_number: number;
 
-  const session_number = (lastSession?.session_number ?? 0) + 1;
+  if (session_number_input && parseInt(session_number_input, 10) > 0) {
+    session_number = parseInt(session_number_input, 10);
+  } else {
+    const { data: lastSession } = await supabase
+      .from("sessions")
+      .select("session_number")
+      .eq("client_id", client_id)
+      .eq("user_id", user.id)
+      .order("session_number", { ascending: false })
+      .limit(1)
+      .single();
+
+    session_number = (lastSession?.session_number ?? 0) + 1;
+  }
 
   const { error } = await supabase.from("sessions").insert({
     user_id: user.id,
@@ -172,6 +181,8 @@ export async function createSession(formData: FormData) {
     center_id,
     session_number,
     session_date,
+    start_time,
+    end_time,
     duration_minutes,
     session_type,
     notes,
@@ -180,6 +191,55 @@ export async function createSession(formData: FormData) {
   if (error) return { error: "상담 기록 등록에 실패했습니다." };
 
   revalidatePath(`/clients/${client_id}`);
+  return { success: true };
+}
+
+export async function updateSession(sessionId: string, formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "로그인이 필요합니다." };
+
+  const client_id = formData.get("client_id") as string;
+  const session_date = formData.get("session_date") as string;
+  const start_time = (formData.get("start_time") as string) || null;
+  const end_time = (formData.get("end_time") as string) || null;
+  const session_number_input = formData.get("session_number") as string;
+  const session_number = parseInt(session_number_input, 10);
+  const session_type = (formData.get("session_type") as string) || null;
+  const notes = (formData.get("notes") as string) || null;
+
+  if (!session_date || !session_number) {
+    return { error: "필수 항목을 입력해주세요." };
+  }
+
+  let duration_minutes = 50;
+  if (start_time && end_time) {
+    const [sh, sm] = start_time.split(":").map(Number);
+    const [eh, em] = end_time.split(":").map(Number);
+    const calc = (eh * 60 + em) - (sh * 60 + sm);
+    if (calc > 0) duration_minutes = calc;
+  }
+
+  const { error } = await supabase
+    .from("sessions")
+    .update({
+      session_date,
+      start_time,
+      end_time,
+      session_number,
+      duration_minutes,
+      session_type,
+      notes,
+    })
+    .eq("id", sessionId)
+    .eq("user_id", user.id);
+
+  if (error) return { error: "상담 기록 수정에 실패했습니다." };
+
+  revalidatePath(`/clients/${client_id}`);
+  revalidatePath("/dashboard");
   return { success: true };
 }
 
@@ -197,6 +257,59 @@ export async function deleteSession(sessionId: string, clientId: string) {
     .eq("user_id", user.id);
 
   if (error) return { error: "상담 기록 삭제에 실패했습니다." };
+
+  revalidatePath(`/clients/${clientId}`);
+  return { success: true };
+}
+
+// 심리검사 CRUD
+export async function createClientTest(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "로그인이 필요합니다." };
+
+  const client_id = formData.get("client_id") as string;
+  const test_name = formData.get("test_name") as string;
+  const test_date = formData.get("test_date") as string;
+  const notes = (formData.get("notes") as string) || null;
+
+  if (!client_id || !test_name?.trim() || !test_date) {
+    return { error: "검사명과 날짜를 입력해주세요." };
+  }
+
+  const { error } = await supabase.from("client_tests").insert({
+    user_id: user.id,
+    client_id,
+    test_name,
+    test_date,
+    notes,
+  });
+
+  if (error) {
+    console.error("client_tests insert error:", error);
+    return { error: `심리검사 등록에 실패했습니다: ${error.message}` };
+  }
+
+  revalidatePath(`/clients/${client_id}`);
+  return { success: true };
+}
+
+export async function deleteClientTest(testId: string, clientId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "로그인이 필요합니다." };
+
+  const { error } = await supabase
+    .from("client_tests")
+    .delete()
+    .eq("id", testId)
+    .eq("user_id", user.id);
+
+  if (error) return { error: "심리검사 삭제에 실패했습니다." };
 
   revalidatePath(`/clients/${clientId}`);
   return { success: true };

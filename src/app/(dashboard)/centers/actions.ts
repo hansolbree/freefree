@@ -40,7 +40,10 @@ export async function createCenter(formData: FormData) {
     .select()
     .single();
 
-  if (error) return { error: "센터 생성에 실패했습니다." };
+  if (error) {
+    console.error("Center create error:", error.message);
+    return { error: error.message };
+  }
 
   await supabase.from("user_centers").insert({
     user_id: user.id,

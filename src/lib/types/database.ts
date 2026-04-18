@@ -233,6 +233,8 @@ export interface Database {
           center_id: string;
           session_number: number;
           session_date: string;
+          start_time: string | null;
+          end_time: string | null;
           duration_minutes: number;
           session_type: string | null;
           notes: string | null;
@@ -246,6 +248,8 @@ export interface Database {
           center_id: string;
           session_number: number;
           session_date: string;
+          start_time?: string | null;
+          end_time?: string | null;
           duration_minutes?: number;
           session_type?: string | null;
           notes?: string | null;
@@ -257,6 +261,8 @@ export interface Database {
           center_id?: string;
           session_number?: number;
           session_date?: string;
+          start_time?: string | null;
+          end_time?: string | null;
           duration_minutes?: number;
           session_type?: string | null;
           notes?: string | null;
@@ -282,6 +288,47 @@ export interface Database {
             columns: ["center_id"];
             isOneToOne: false;
             referencedRelation: "centers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      client_tests: {
+        Row: {
+          id: string;
+          user_id: string;
+          client_id: string;
+          test_name: string;
+          test_date: string;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          client_id: string;
+          test_name: string;
+          test_date: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          test_name?: string;
+          test_date?: string;
+          notes?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "client_tests_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_tests_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
             referencedColumns: ["id"];
           },
         ];

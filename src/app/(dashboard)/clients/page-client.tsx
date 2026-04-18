@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Users, Plus, Search } from "lucide-react";
+import { Users, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createClientRecord } from "./actions";
+import { createClientRecord, deleteClient } from "./actions";
 
 interface Client {
   id: string;
@@ -64,6 +64,13 @@ export function ClientsPageClient({
     return (
       userCenters.find((uc) => uc.center_id === centerId)?.color ?? "#6ECFBD"
     );
+  }
+
+  async function handleDelete(e: React.MouseEvent, clientId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("이 내담자를 삭제하시겠습니까?")) return;
+    await deleteClient(clientId);
   }
 
   async function handleCreate(formData: FormData) {
@@ -117,7 +124,11 @@ export function ClientsPageClient({
                   <Label>소속 센터 *</Label>
                   <Select value={newCenterId} onValueChange={(v) => setNewCenterId(v ?? "")}>
                     <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="센터 선택" />
+                      <SelectValue placeholder="센터 선택">
+                        {newCenterId
+                          ? userCenters.find((uc) => uc.center_id === newCenterId)?.centers?.name
+                          : "센터 선택"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
                       {userCenters.map((uc) => (
@@ -265,6 +276,14 @@ export function ClientsPageClient({
                         비활성
                       </span>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive shrink-0"
+                      onClick={(e) => handleDelete(e, client.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </CardContent>
                 </Card>
               </Link>
