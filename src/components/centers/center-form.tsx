@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,13 +9,95 @@ import { Textarea } from "@/components/ui/textarea";
 import { createCenter, updateCenter } from "@/app/(dashboard)/centers/actions";
 
 const COLOR_PRESETS = [
+  // Row 1: 빨강 → 보라 (따뜻한 톤)
+  "#EF4444", // red
+  "#F97316", // orange
+  "#F4B860", // amber
+  "#EAB308", // yellow
+  "#84CC16", // lime
+  "#22C55E", // green
+
+  // Row 2: 민트 → 파랑 (차가운 톤)
   "#6ECFBD", // mint
-  "#F5A6C8", // pink
-  "#7CB9E8", // blue
-  "#F4B860", // orange
+  "#14B8A6", // teal
+  "#06B6D4", // cyan
+  "#7CB9E8", // sky
+  "#3B82F6", // blue
+  "#6366F1", // indigo
+
+  // Row 3: 보라 → 핑크 (부드러운 톤)
+  "#8B5CF6", // violet
   "#A78BFA", // purple
-  "#6EE7B7", // green
+  "#D946EF", // fuchsia
+  "#EC4899", // pink
+  "#F5A6C8", // rose
+  "#FB923C", // light orange
+
+  // Row 4: 뉴트럴 + 어스 톤
+  "#6EE7B7", // emerald
+  "#A3E635", // chartreuse
+  "#FBBF24", // gold
+  "#F87171", // coral
+  "#A78B7B", // brown
+  "#94A3B8", // slate
 ];
+
+function ColorPicker({
+  color,
+  onChange,
+}: {
+  color: string;
+  onChange: (color: string) => void;
+}) {
+  const pickerRef = useRef<HTMLInputElement>(null);
+  const isCustom = !COLOR_PRESETS.includes(color);
+
+  return (
+    <div className="space-y-2">
+      <Label>센터 색상</Label>
+      <div className="grid grid-cols-7 gap-2">
+        {COLOR_PRESETS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => onChange(c)}
+            className="h-8 w-8 rounded-full transition-all"
+            style={{
+              backgroundColor: c,
+              outline: color === c ? "3px solid" : "none",
+              outlineColor: c,
+              outlineOffset: "2px",
+            }}
+          />
+        ))}
+        {/* 커스텀 컬러 피커 버튼 */}
+        <button
+          type="button"
+          onClick={() => pickerRef.current?.click()}
+          className="relative h-8 w-8 rounded-full border-2 border-dashed border-muted-foreground/40 transition-all flex items-center justify-center overflow-hidden"
+          style={{
+            backgroundColor: isCustom ? color : undefined,
+            outline: isCustom ? "3px solid" : "none",
+            outlineColor: isCustom ? color : undefined,
+            outlineOffset: "2px",
+          }}
+        >
+          {!isCustom && (
+            <Palette className="h-4 w-4 text-muted-foreground" />
+          )}
+          <input
+            ref={pickerRef}
+            type="color"
+            value={color}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            tabIndex={-1}
+          />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 interface CenterFormProps {
   center?: {
@@ -101,25 +184,7 @@ export function CenterForm({ center, onSuccess }: CenterFormProps) {
           rows={3}
         />
       </div>
-      <div className="space-y-2">
-        <Label>센터 색상</Label>
-        <div className="flex gap-2">
-          {COLOR_PRESETS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setColor(c)}
-              className="h-8 w-8 rounded-full transition-all"
-              style={{
-                backgroundColor: c,
-                outline: color === c ? "3px solid" : "none",
-                outlineColor: c,
-                outlineOffset: "2px",
-              }}
-            />
-          ))}
-        </div>
-      </div>
+      <ColorPicker color={color} onChange={setColor} />
       <Button
         type="submit"
         disabled={loading}
