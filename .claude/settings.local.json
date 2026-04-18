@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(gh repo create:*)",
+      "Bash(brew install:*)",
+      "Bash(brew:*)",
+      "Bash(/opt/homebrew/bin/brew:*)",
+      "Bash(/usr/local/bin/brew:*)",
+      "Bash(/opt/homebrew/bin/gh auth status)",
+      "Bash(/opt/homebrew/bin/gh repo create freefree --public --source=. --remote=origin)",
+      "Bash(git remote:*)",
+      "Bash(git remote add:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$HOME/.nvm/versions/node/*/bin:$PATH\")",
+      "Bash(mdfind:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(npx:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}
