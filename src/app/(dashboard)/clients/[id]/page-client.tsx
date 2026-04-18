@@ -166,7 +166,7 @@ export function ClientDetailClient({
                 {error}
               </div>
             )}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="session_date" className="text-xs">
                   상담 날짜 *
@@ -197,7 +197,7 @@ export function ClientDetailClient({
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="start_time" className="text-xs">
                   시작 시간
@@ -304,7 +304,7 @@ export function ClientDetailClient({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             {client.phone ? (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Phone className="h-3.5 w-3.5" />

@@ -15,7 +15,7 @@ import {
   isSameMonth,
   getWeek,
 } from "date-fns";
-import { ko } from "date-fns/locale";
+import { enUS, ko } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +52,18 @@ interface CalendarSession {
   centers: { name: string } | null;
 }
 
-const HOURS = Array.from({ length: 11 }, (_, i) => i + 9); // 9~19
+const DAY_START_HOUR = 7;
+const DAY_END_HOUR = 22;
+const HOURS = Array.from(
+  { length: DAY_END_HOUR - DAY_START_HOUR + 1 },
+  (_, i) => i + DAY_START_HOUR
+); // 7~22
+
+function formatAmPm(time: string) {
+  const hh = time.slice(0, 2);
+  const hour = parseInt(hh, 10);
+  return `${hour < 12 ? "AM" : "PM"} ${time.slice(0, 5)}`;
+}
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 // 미니 캘린더에서 사용할 요일 헤더
@@ -191,7 +202,7 @@ export function WeeklyCalendar({
     }
     const [sh, sm] = session.start_time.split(":").map(Number);
     const [eh, em] = session.end_time.split(":").map(Number);
-    const startMin = (sh - 9) * 60 + sm;
+    const startMin = (sh - DAY_START_HOUR) * 60 + sm;
     const duration = eh * 60 + em - (sh * 60 + sm);
     return {
       top: `${(startMin / 60) * 5}rem`,
@@ -205,10 +216,213 @@ export function WeeklyCalendar({
 
   const miniCalDays = getMiniCalDays();
 
+  const currentDayStr = format(currentDate, "yyyy-MM-dd");
+  const currentDaySessions = filteredSessions
+    .filter((s) => s.session_date === currentDayStr)
+    .sort((a, b) =>
+      (a.start_time ?? "").localeCompare(b.start_time ?? "")
+    );
+
   return (
-    <div className="flex gap-6">
-      {/* Left Sidebar */}
-      <div className="hidden lg:block w-[260px] shrink-0 space-y-6">
+    <>
+      {/* Mobile Day Agenda — < md */}
+      <div className="md:hidden">
+        {/* Top Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-baseline gap-1.5 tracking-wide">
+            <span className="text-base font-bold text-foreground tabular-nums">
+              {format(currentDate, "yyyy.MMM.dd", { locale: enUS }).toUpperCase()}
+            </span>
+            <span className="text-base font-bold text-primary">
+              {format(currentDate, "EEE", { locale: enUS }).toUpperCase()}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentDate(subWeeks(currentDate, 1))}
+              className="p-1.5 rounded-lg hover:bg-muted/50 text-muted-foreground"
+              aria-label="이전 주"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setCurrentDate(addWeeks(currentDate, 1))}
+              className="p-1.5 rounded-lg hover:bg-muted/50 text-muted-foreground"
+              aria-label="다음 주"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Week Day Strip */}
+        <div className="grid grid-cols-7 gap-1 mb-5">
+          {weekDays.map((day) => {
+            const isSelected = isSameDay(day, currentDate);
+            const isToday = isSameDay(day, new Date());
+            const dayStr = format(day, "yyyy-MM-dd");
+            const daySessionCount = sessions.filter(
+              (s) => s.session_date === dayStr
+            ).length;
+            return (
+              <button
+                key={day.toISOString()}
+                onClick={() => setCurrentDate(day)}
+                className="flex flex-col items-center gap-1 py-1"
+              >
+                <span
+                  className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-all tabular-nums ${
+                    isSelected
+                      ? "bg-primary text-white shadow-sm"
+                      : isToday
+                        ? "text-primary"
+                        : "text-foreground"
+                  }`}
+                >
+                  {format(day, "dd")}
+                </span>
+                <span
+                  className={`text-[10px] font-semibold tracking-wider ${
+                    isSelected
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {format(day, "EEE", { locale: enUS }).toUpperCase()}
+                </span>
+                <span
+                  className={`h-1 w-1 rounded-full mt-0.5 ${
+                    daySessionCount > 0
+                      ? isSelected
+                        ? "bg-primary"
+                        : "bg-primary/60"
+                      : "bg-transparent"
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Center Filter Pills */}
+        {userCenters.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {userCenters.map((uc) => (
+              <button
+                key={uc.center_id}
+                onClick={() => toggleCenter(uc.center_id)}
+                className="flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-all border"
+                style={{
+                  backgroundColor: visibleCenters.has(uc.center_id)
+                    ? uc.color + "20"
+                    : "transparent",
+                  borderColor: uc.color,
+                  opacity: visibleCenters.has(uc.center_id) ? 1 : 0.4,
+                }}
+              >
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: uc.color }}
+                />
+                {uc.centers?.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Timeline — internally scrollable */}
+        <div className="rounded-2xl bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden">
+          <div
+            className="overflow-y-auto overscroll-contain pt-4"
+            style={{ maxHeight: "calc(100vh - 18rem)" }}
+          >
+            <div className="grid grid-cols-[3rem_1fr]">
+              {/* Hour Labels Column */}
+              <div>
+                {HOURS.map((hour) => (
+                  <div
+                    key={hour}
+                    className="h-[5rem] flex items-start justify-end pr-2 -mt-2"
+                  >
+                    <span className="text-[11px] text-muted-foreground/70 font-medium tabular-nums">
+                      {String(hour).padStart(2, "0")}:00
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Day Column */}
+              <div className="relative border-l border-border/[0.06]">
+                {HOURS.map((hour, i) => (
+                  <div
+                    key={hour}
+                    className={`h-[5rem] ${i < HOURS.length - 1 ? "border-b border-border/[0.06]" : ""}`}
+                  />
+                ))}
+
+                {/* Session Blocks */}
+                {currentDaySessions.map((session) => {
+                  const color = getColorForCenter(session.center_id);
+                  const style = getSessionStyle(session);
+                  const clientName = session.clients?.name ?? "내담자";
+                  return (
+                    <button
+                      key={session.id}
+                      onClick={() => handleSessionClick(session)}
+                      className="absolute left-2 right-3 rounded-lg px-3 py-2 text-left transition-all hover:shadow-md active:scale-[0.99] overflow-hidden"
+                      style={{
+                        ...style,
+                        backgroundColor: color + "20",
+                        borderLeft: `3px solid ${color}`,
+                      }}
+                    >
+                      <p className="text-sm font-bold text-foreground truncate leading-tight">
+                        {clientName}
+                      </p>
+                      {session.start_time && session.end_time && (
+                        <p className="text-[11px] text-foreground/60 mt-0.5 tabular-nums">
+                          {formatAmPm(session.start_time)} –{" "}
+                          {formatAmPm(session.end_time)}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-[10px] text-muted-foreground truncate">
+                          {session.centers?.name}
+                          {session.session_type
+                            ? ` · ${session.session_type}`
+                            : ""}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FAB */}
+        <button
+          onClick={() => {
+            setSelectedDate(currentDayStr);
+            setEditSession(null);
+            setDialogOpen(true);
+          }}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 active:scale-95 flex items-center justify-center z-40 transition-all"
+          aria-label="예약 추가"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Desktop Week View — md+ */}
+      <div className="hidden md:flex gap-6">
+        {/* Left Sidebar */}
+        <div className="hidden lg:block w-[260px] shrink-0 space-y-6">
         {/* Mini Calendar */}
         <div className="rounded-2xl bg-white/80 backdrop-blur-sm shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
@@ -510,6 +724,7 @@ export function WeeklyCalendar({
           </div>
         </div>
       </div>
+      </div>
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -545,6 +760,6 @@ export function WeeklyCalendar({
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

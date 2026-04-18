@@ -149,7 +149,7 @@ export function ClientsPageClient({
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="phone">전화번호</Label>
                     <Input
@@ -217,7 +217,7 @@ export function ClientsPageClient({
           />
         </div>
         <Select value={filterCenter} onValueChange={(v) => setFilterCenter(v ?? "all")}>
-          <SelectTrigger className="w-40 rounded-xl">
+          <SelectTrigger className="w-32 sm:w-40 rounded-xl">
             <SelectValue placeholder="전체 센터" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">

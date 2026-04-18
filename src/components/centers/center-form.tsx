@@ -61,7 +61,7 @@ function ColorPicker({
             key={c}
             type="button"
             onClick={() => onChange(c)}
-            className="h-8 w-8 rounded-full transition-all"
+            className="h-10 w-10 sm:h-8 sm:w-8 rounded-full transition-all"
             style={{
               backgroundColor: c,
               outline: color === c ? "3px solid" : "none",
@@ -74,7 +74,7 @@ function ColorPicker({
         <button
           type="button"
           onClick={() => pickerRef.current?.click()}
-          className="relative h-8 w-8 rounded-full border-2 border-dashed border-muted-foreground/40 transition-all flex items-center justify-center overflow-hidden"
+          className="relative h-10 w-10 sm:h-8 sm:w-8 rounded-full border-2 border-dashed border-muted-foreground/40 transition-all flex items-center justify-center overflow-hidden"
           style={{
             backgroundColor: isCustom ? color : undefined,
             outline: isCustom ? "3px solid" : "none",
