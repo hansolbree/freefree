@@ -12,9 +12,11 @@ export default async function ClientsPage() {
     name: string;
     center_id: string;
     phone: string | null;
+    email: string | null;
     gender: string | null;
     occupation: string | null;
     birth_date: string | null;
+    notes: string | null;
     is_active: boolean;
     centers: { name: string } | null;
   }[] = [];
@@ -29,7 +31,7 @@ export default async function ClientsPage() {
     const [clientsRes, centersRes] = await Promise.all([
       supabase
         .from("clients")
-        .select("id, name, center_id, phone, gender, occupation, birth_date, is_active, centers(name)")
+        .select("id, name, center_id, phone, email, gender, occupation, birth_date, notes, is_active, centers(name)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
       supabase

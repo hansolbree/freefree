@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Users, Plus, Search, Trash2 } from "lucide-react";
+import { Users, Plus, Search, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createClientRecord, deleteClient } from "./actions";
+import { createClientRecord, deleteClient, updateClient } from "./actions";
 
 function calculateAge(birthDate: string | null): number | null {
   if (!birthDate) return null;
@@ -40,9 +40,11 @@ interface Client {
   name: string;
   center_id: string;
   phone: string | null;
+  email: string | null;
   gender: string | null;
   occupation: string | null;
   birth_date: string | null;
+  notes: string | null;
   is_active: boolean;
   centers: { name: string } | null;
 }
@@ -66,6 +68,10 @@ export function ClientsPageClient({
   const [newCenterId, setNewCenterId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [editCenterId, setEditCenterId] = useState("");
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   const filtered = clients.filter((c) => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
@@ -85,6 +91,28 @@ export function ClientsPageClient({
     e.stopPropagation();
     if (!confirm("이 내담자를 삭제하시겠습니까?")) return;
     await deleteClient(clientId);
+  }
+
+  function handleEditClick(e: React.MouseEvent, client: Client) {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditingClient(client);
+    setEditCenterId(client.center_id);
+    setEditError(null);
+  }
+
+  async function handleEdit(formData: FormData) {
+    if (!editingClient) return;
+    setEditLoading(true);
+    setEditError(null);
+    formData.set("center_id", editCenterId);
+    const result = await updateClient(editingClient.id, formData);
+    setEditLoading(false);
+    if (result.error) {
+      setEditError(result.error);
+    } else {
+      setEditingClient(null);
+    }
   }
 
   async function handleCreate(formData: FormData) {
@@ -318,8 +346,18 @@ export function ClientsPageClient({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive shrink-0"
+                      className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground shrink-0"
+                      onClick={(e) => handleEditClick(e, client)}
+                      aria-label="수정"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive shrink-0"
                       onClick={(e) => handleDelete(e, client.id)}
+                      aria-label="삭제"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -330,6 +368,132 @@ export function ClientsPageClient({
           })}
         </div>
       )}
+
+      {/* Edit Dialog */}
+      <Dialog
+        open={!!editingClient}
+        onOpenChange={(open) => {
+          if (!open) setEditingClient(null);
+        }}
+      >
+        <DialogContent className="rounded-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>내담자 수정</DialogTitle>
+          </DialogHeader>
+          {editingClient && (
+            <form action={handleEdit} className="space-y-4">
+              {editError && (
+                <div className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+                  {editError}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label>소속 센터 *</Label>
+                <Select
+                  value={editCenterId}
+                  onValueChange={(v) => setEditCenterId(v ?? "")}
+                >
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue>
+                      {userCenters.find((uc) => uc.center_id === editCenterId)
+                        ?.centers?.name ?? "센터 선택"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {userCenters.map((uc) => (
+                      <SelectItem key={uc.center_id} value={uc.center_id}>
+                        {uc.centers?.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">이름 *</Label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  defaultValue={editingClient.name}
+                  placeholder="내담자 이름"
+                  className="rounded-xl"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone">전화번호</Label>
+                  <Input
+                    id="edit-phone"
+                    name="phone"
+                    defaultValue={editingClient.phone ?? ""}
+                    placeholder="010-0000-0000"
+                    className="rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-age">나이</Label>
+                  <Input
+                    id="edit-age"
+                    name="age"
+                    type="number"
+                    min={0}
+                    max={120}
+                    defaultValue={calculateAge(editingClient.birth_date) ?? ""}
+                    placeholder="만 나이"
+                    className="rounded-xl"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-gender">성별</Label>
+                  <Select
+                    name="gender"
+                    defaultValue={editingClient.gender ?? undefined}
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="선택" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="여성">여성</SelectItem>
+                      <SelectItem value="남성">남성</SelectItem>
+                      <SelectItem value="기타">기타</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-occupation">직업</Label>
+                  <Input
+                    id="edit-occupation"
+                    name="occupation"
+                    defaultValue={editingClient.occupation ?? ""}
+                    placeholder="예: 회사원, 학생"
+                    className="rounded-xl"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-notes">메모</Label>
+                <Textarea
+                  id="edit-notes"
+                  name="notes"
+                  defaultValue={editingClient.notes ?? ""}
+                  placeholder="특이사항 메모"
+                  className="rounded-xl resize-none"
+                  rows={2}
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={editLoading}
+                className="w-full rounded-xl bg-gradient-mint-pink-vivid text-white font-semibold hover:opacity-90 transition-opacity"
+              >
+                {editLoading ? "수정 중..." : "수정 완료"}
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
