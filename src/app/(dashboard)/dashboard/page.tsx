@@ -15,13 +15,20 @@ export default async function DashboardPage() {
   const startStr = format(weekStart, "yyyy-MM-dd");
   const endStr = format(addDays(weekStart, 6), "yyyy-MM-dd");
 
-  const [sessionsRes, userCentersRes] = await Promise.all([
+  const [sessionsRes, lecturesRes, userCentersRes] = await Promise.all([
     supabase
       .from("sessions")
       .select("*, clients(name), centers(name)")
       .eq("user_id", user.id)
       .gte("session_date", startStr)
       .lte("session_date", endStr)
+      .order("start_time", { ascending: true }),
+    supabase
+      .from("lectures")
+      .select("*, centers(name)")
+      .eq("user_id", user.id)
+      .gte("lecture_date", startStr)
+      .lte("lecture_date", endStr)
       .order("start_time", { ascending: true }),
     supabase
       .from("user_centers")
@@ -34,6 +41,7 @@ export default async function DashboardPage() {
     <WeeklyCalendar
       initialDate={now.toISOString()}
       initialSessions={sessionsRes.data ?? []}
+      initialLectures={lecturesRes.data ?? []}
       initialUserCenters={userCentersRes.data ?? []}
     />
   );

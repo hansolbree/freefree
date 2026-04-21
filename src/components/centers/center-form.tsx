@@ -64,7 +64,8 @@ function ColorPicker({
             className="h-10 w-10 sm:h-8 sm:w-8 rounded-full transition-all"
             style={{
               backgroundColor: c,
-              outline: color === c ? "3px solid" : "none",
+              outlineStyle: color === c ? "solid" : "none",
+              outlineWidth: color === c ? "3px" : "0",
               outlineColor: c,
               outlineOffset: "2px",
             }}
@@ -77,7 +78,8 @@ function ColorPicker({
           className="relative h-10 w-10 sm:h-8 sm:w-8 rounded-full border-2 border-dashed border-muted-foreground/40 transition-all flex items-center justify-center overflow-hidden"
           style={{
             backgroundColor: isCustom ? color : undefined,
-            outline: isCustom ? "3px solid" : "none",
+            outlineStyle: isCustom ? "solid" : "none",
+            outlineWidth: isCustom ? "3px" : "0",
             outlineColor: isCustom ? color : undefined,
             outlineOffset: "2px",
           }}

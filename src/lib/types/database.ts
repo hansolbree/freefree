@@ -295,6 +295,75 @@ export interface Database {
           },
         ];
       };
+      lectures: {
+        Row: {
+          id: string;
+          user_id: string;
+          series_id: string | null;
+          title: string;
+          center_id: string | null;
+          location: string | null;
+          audience: string | null;
+          color: string;
+          lecture_date: string;
+          start_time: string;
+          end_time: string;
+          fee: number | null;
+          fee_paid: boolean;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          series_id?: string | null;
+          title: string;
+          center_id?: string | null;
+          location?: string | null;
+          audience?: string | null;
+          color?: string;
+          lecture_date: string;
+          start_time: string;
+          end_time: string;
+          fee?: number | null;
+          fee_paid?: boolean;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          series_id?: string | null;
+          title?: string;
+          center_id?: string | null;
+          location?: string | null;
+          audience?: string | null;
+          color?: string;
+          lecture_date?: string;
+          start_time?: string;
+          end_time?: string;
+          fee?: number | null;
+          fee_paid?: boolean;
+          notes?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lectures_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lectures_center_id_fkey";
+            columns: ["center_id"];
+            isOneToOne: false;
+            referencedRelation: "centers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       client_tests: {
         Row: {
           id: string;
