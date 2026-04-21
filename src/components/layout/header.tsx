@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarNav } from "./sidebar";
 
-export function Header() {
+export function Header({ isAdmin = false }: { isAdmin?: boolean }) {
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-border/50 bg-white/70 backdrop-blur-md px-4 md:hidden">
       <Sheet>
@@ -23,7 +23,7 @@ export function Header() {
           <SheetTitle className="text-xl font-bold text-gradient-mint-pink px-2 mb-6">
             FreeFree
           </SheetTitle>
-          <SidebarNav />
+          <SidebarNav isAdmin={isAdmin} />
         </SheetContent>
       </Sheet>
       <h1 className="text-lg font-bold text-gradient-mint-pink">FreeFree</h1>

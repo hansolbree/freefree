@@ -2,20 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Building2, Users, Settings, LogOut } from "lucide-react";
+import { Calendar, Building2, Users, Settings, LogOut, Shield } from "lucide-react";
 import { logout } from "@/app/(auth)/logout/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const navItems = [
+const baseNavItems = [
   { href: "/dashboard", icon: Calendar, label: "캘린더" },
   { href: "/centers", icon: Building2, label: "센터" },
   { href: "/clients", icon: Users, label: "내담자" },
   { href: "/settings", icon: Settings, label: "설정" },
 ];
 
-export function Sidebar() {
+function getNavItems(isAdmin: boolean) {
+  return isAdmin
+    ? [...baseNavItems, { href: "/admin", icon: Shield, label: "어드민" }]
+    : baseNavItems;
+}
+
+export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const navItems = getNavItems(isAdmin);
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white/70 backdrop-blur-md border-r border-border/50">
@@ -70,8 +77,9 @@ export function Sidebar() {
   );
 }
 
-export function SidebarNav() {
+export function SidebarNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const navItems = getNavItems(isAdmin);
 
   return (
     <nav className="flex flex-col space-y-1.5 px-2">
