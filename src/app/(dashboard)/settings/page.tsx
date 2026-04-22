@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/auth";
 import { SettingsClient } from "./page-client";
 
 export default async function SettingsPage() {
+  const user = await getAuthUser();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   let profile: { name: string | null; phone: string | null; email: string } = {
     name: null,

@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/auth";
 import { ClientsPageClient } from "./page-client";
 
 export default async function ClientsPage() {
+  const user = await getAuthUser();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   let clients: {
     id: string;

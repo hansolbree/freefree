@@ -1,12 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/auth";
 import { CenterCard } from "@/components/centers/center-card";
 import { CenterPageClient } from "./page-client";
 
 export default async function CentersPage() {
+  const user = await getAuthUser();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   let centers: {
     id: string;

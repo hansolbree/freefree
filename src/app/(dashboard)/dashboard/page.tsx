@@ -1,14 +1,12 @@
 import { addDays, format, startOfWeek } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/auth";
 import { WeeklyCalendar } from "@/components/calendar/weekly-calendar";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return null;
+  const supabase = await createClient();
 
   const now = new Date();
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });

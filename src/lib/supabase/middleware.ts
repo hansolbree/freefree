@@ -6,6 +6,12 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // 랜딩(/)은 공개 정적 페이지 — auth 갱신 생략해서 TTFB 단축
+  // (로그인 상태인 경우 클라이언트 AutoRedirect가 /dashboard로 점프시킴)
+  if (request.nextUrl.pathname === "/") {
+    return supabaseResponse;
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

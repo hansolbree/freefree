@@ -1,14 +1,10 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, isAdminEmail } from "@/lib/supabase/admin";
+import { getAuthUser } from "@/lib/supabase/auth";
 import { AdminPageClient, type AdminUserRow } from "./page-client";
 
 export default async function AdminPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user || !isAdminEmail(user.email)) {
     redirect("/dashboard");
   }

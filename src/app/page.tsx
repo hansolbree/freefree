@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
   Building2,
   Calendar,
@@ -8,27 +7,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/reveal";
+import { AutoRedirect } from "@/components/landing/auto-redirect";
 
-export default async function Home() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (
-    supabaseUrl &&
-    supabaseAnonKey &&
-    supabaseUrl !== "your_supabase_url_here" &&
-    supabaseAnonKey !== "your_supabase_anon_key_here"
-  ) {
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) redirect("/dashboard");
-  }
-
+export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-mint-pink">
+      <AutoRedirect />
       {/* Nav */}
       <nav className="flex items-center justify-between px-5 md:px-12 py-4 md:py-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gradient-mint-pink">
