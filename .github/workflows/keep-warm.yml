@@ -1,0 +1,28 @@
+name: Keep Vercel warm
+
+on:
+  schedule:
+    # 5분 간격으로 프로덕션 URL 핑 (서버리스 콜드 스타트 방지)
+    # GitHub cron은 UTC이며 혼잡 시간대에는 최대 10분 지연될 수 있음
+    - cron: "*/5 * * * *"
+  workflow_dispatch: # 수동 실행 버튼
+
+concurrency:
+  group: keep-warm
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping landing page
+        run: |
+          curl -sS -o /dev/null -w "status=%{http_code} time=%{time_total}s\n" \
+            --max-time 30 \
+            https://freefree-sooty.vercel.app/ || true
+      - name: Ping login page
+        run: |
+          curl -sS -o /dev/null -w "status=%{http_code} time=%{time_total}s\n" \
+            --max-time 30 \
+            https://freefree-sooty.vercel.app/login || true
