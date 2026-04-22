@@ -111,7 +111,6 @@ export function WeeklyCalendar({
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [editSession, setEditSession] = useState<CalendarSession | null>(null);
   const [editLecture, setEditLecture] = useState<CalendarLecture | null>(null);
-  const isFirstLoadRef = useRef(true);
   const desktopGridRef = useRef<HTMLDivElement>(null);
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
@@ -165,10 +164,6 @@ export function WeeklyCalendar({
   }
 
   const loadData = useCallback(async () => {
-    if (isFirstLoadRef.current) {
-      isFirstLoadRef.current = false;
-      return;
-    }
     const start = format(weekStart, "yyyy-MM-dd");
     const end = format(addDays(weekStart, 6), "yyyy-MM-dd");
     const { sessions: s, lectures: l, userCenters: uc } =
