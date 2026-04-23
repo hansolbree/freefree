@@ -170,6 +170,20 @@ export function ClientDetailClient({
     onSubmit: (formData: FormData) => Promise<void>;
     onCancel: () => void;
   }) {
+    const [startTime, setStartTime] = useState(
+      session?.start_time?.slice(0, 5) ?? "10:00",
+    );
+    const [endTime, setEndTime] = useState(
+      session?.end_time?.slice(0, 5) ?? "11:00",
+    );
+
+    function addOneHour(time: string): string {
+      const [h, m] = time.split(":").map(Number);
+      if (isNaN(h) || isNaN(m)) return time;
+      const newH = (h + 1) % 24;
+      return `${String(newH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    }
+
     return (
       <Card className="rounded-2xl border-0 bg-white/70 backdrop-blur-sm shadow-sm mb-4">
         <CardContent className="p-4">
@@ -219,7 +233,12 @@ export function ClientDetailClient({
                   id="start_time"
                   name="start_time"
                   type="time"
-                  defaultValue={session?.start_time?.slice(0, 5) ?? "10:00"}
+                  value={startTime}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setStartTime(v);
+                    if (v) setEndTime(addOneHour(v));
+                  }}
                   className="rounded-xl"
                 />
               </div>
@@ -231,7 +250,8 @@ export function ClientDetailClient({
                   id="end_time"
                   name="end_time"
                   type="time"
-                  defaultValue={session?.end_time?.slice(0, 5) ?? "11:00"}
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
                   className="rounded-xl"
                 />
               </div>
@@ -353,7 +373,7 @@ export function ClientDetailClient({
           {client.notes ? (
             <>
               <Separator className="my-5" />
-              <p className="text-base text-muted-foreground">{client.notes}</p>
+              <p className="text-base text-muted-foreground whitespace-pre-wrap">{client.notes}</p>
             </>
           ) : null}
         </CardContent>
@@ -579,7 +599,7 @@ export function ClientDetailClient({
                       </div>
                     </div>
                     {session.notes ? (
-                      <p className="mt-2 text-base text-muted-foreground ml-13">
+                      <p className="mt-2 text-base text-muted-foreground ml-13 whitespace-pre-wrap">
                         {session.notes}
                       </p>
                     ) : null}

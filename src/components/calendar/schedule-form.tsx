@@ -65,11 +65,24 @@ export function ScheduleForm({
   const [centerId, setCenterId] = useState(session?.center_id ?? "");
   const [clientId, setClientId] = useState(session?.client_id ?? "");
   const [sessionType, setSessionType] = useState(session?.session_type ?? "");
+  const [startTime, setStartTime] = useState(
+    session?.start_time?.slice(0, 5) ?? "10:00",
+  );
+  const [endTime, setEndTime] = useState(
+    session?.end_time?.slice(0, 5) ?? "11:00",
+  );
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingClients, setLoadingClients] = useState(false);
   const [clientsReady, setClientsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function addOneHour(time: string): string {
+    const [h, m] = time.split(":").map(Number);
+    if (isNaN(h) || isNaN(m)) return time;
+    const newH = (h + 1) % 24;
+    return `${String(newH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }
 
   // 센터 변경 시 해당 센터의 내담자 목록 로드
   useEffect(() => {
@@ -238,7 +251,12 @@ export function ScheduleForm({
             id="start_time"
             name="start_time"
             type="time"
-            defaultValue={session?.start_time?.slice(0, 5) ?? "10:00"}
+            value={startTime}
+            onChange={(e) => {
+              const v = e.target.value;
+              setStartTime(v);
+              if (v) setEndTime(addOneHour(v));
+            }}
             className="rounded-xl"
             required
           />
@@ -249,7 +267,8 @@ export function ScheduleForm({
             id="end_time"
             name="end_time"
             type="time"
-            defaultValue={session?.end_time?.slice(0, 5) ?? "11:00"}
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
             className="rounded-xl"
             required
           />
